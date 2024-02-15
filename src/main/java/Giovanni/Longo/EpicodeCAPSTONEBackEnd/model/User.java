@@ -1,6 +1,7 @@
 package Giovanni.Longo.EpicodeCAPSTONEBackEnd.model;
 
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class User implements UserDetails {
     private Role role;
 
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("utente")
     private List<StatisticaGioco> statisticheGiochi;
 
     @Override
