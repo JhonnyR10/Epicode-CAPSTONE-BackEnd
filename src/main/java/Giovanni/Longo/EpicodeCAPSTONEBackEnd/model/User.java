@@ -32,7 +32,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnoreProperties("utente")
     private List<StatisticaGioco> statisticheGiochi;
 

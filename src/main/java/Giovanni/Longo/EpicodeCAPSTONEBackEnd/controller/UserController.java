@@ -8,7 +8,9 @@ import Giovanni.Longo.EpicodeCAPSTONEBackEnd.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +21,19 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
+    @GetMapping("/all")
     public Page<User> getUsers(@RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "10") int size,
                                @RequestParam(defaultValue = "id") String orderBy) {
         return userService.getUsers(page, size, orderBy);
+    }
+
+    @GetMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<User> getProfile(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        // user contiene le informazioni dell'utente come nome, cognome, ruolo, ecc.
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/{id}")
