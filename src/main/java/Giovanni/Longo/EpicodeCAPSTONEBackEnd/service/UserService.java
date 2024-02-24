@@ -5,6 +5,8 @@ import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.NotFoundException;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.model.User;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.payloads.UserRegisterDTO;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.repository.UserRepository;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,11 +16,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private Cloudinary cloudinaryUploader;
     private PasswordEncoder bcrypt = new BCryptPasswordEncoder(11);
 
     public Page<User> getUsers(int page, int size, String orderBy) {
@@ -66,5 +73,12 @@ public class UserService {
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("Utente con email " + email + " non trovato!"));
+    }
+
+    public User uploadAvatar(long id, MultipartFile file) throws IOException {
+        User found = this.findById(id);
+        String avatarURL = (String) cloudinaryUploader.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("url");
+        found.setAvatar(avatarURL);
+        return userRepository.save(found);
     }
 }

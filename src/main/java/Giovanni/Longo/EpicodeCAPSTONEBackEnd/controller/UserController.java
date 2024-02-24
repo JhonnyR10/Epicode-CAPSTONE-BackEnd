@@ -14,6 +14,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/user")
@@ -64,5 +67,14 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMIN') or (#id == principal.id)")
     public void findByIdAndDelete(@PathVariable long id) {
         userService.findByIdAndDelete(id);
+    }
+
+    @PatchMapping("/{userId}/avatar")
+    public User uploadAvatar(@RequestParam("avatar") MultipartFile file, @PathVariable long userId) {
+        try {
+            return userService.uploadAvatar(userId, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
