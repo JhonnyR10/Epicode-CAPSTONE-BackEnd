@@ -12,4 +12,6 @@ public interface StatisticaGiocoRepository extends JpaRepository<StatisticaGioco
     Optional<StatisticaGioco> findById(Long id);
 
     List<StatisticaGioco> findAllByNomeGioco(String nomeGioco);
+
+    void deleteByIdStatisticaGioco(Long statisticaId);
 }

@@ -81,4 +81,16 @@ public class UserService {
         found.setAvatar(avatarURL);
         return userRepository.save(found);
     }
+
+    public void deleteStatisticaGioco(Long userId, Long statisticaId) {
+        User userFound = this.findById(userId);
+
+        if (userFound != null) {
+            userFound.removeStatisticaGioco(statisticaId);
+            userRepository.save(userFound);
+        } else {
+            System.out.println("Utente non trovato con ID: " + userId);
+        }
+    }
+
 }

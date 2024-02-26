@@ -20,6 +20,7 @@ public class StatisticaGiocoController {
 
     @PostMapping("/{userId}")
     @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> salvaStatisticaGiocoDaJson(@PathVariable Long userId, @RequestBody String jsonApiResponse) {
         try {
             statisticheGiocoService.salvaStatisticaGiocoDaJson(userId, jsonApiResponse);
@@ -70,12 +71,17 @@ public class StatisticaGiocoController {
         }
     }
 
-    @DeleteMapping("/{userId}/{statisticaId}")
-    @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
-    public ResponseEntity<String> eliminaStatisticaGioco(@PathVariable Long userId, @PathVariable Long statisticaId) {
-        statisticheGiocoService.deleteStatisticaGioco(userId, statisticaId);
-        return ResponseEntity.ok("Statistica eliminata con successo");
-    }
+    //    @DeleteMapping("/{userId}/{statisticaId}")
+//    @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
+//    public ResponseEntity<String> eliminaStatisticaGioco(@PathVariable Long userId, @PathVariable Long statisticaId) {
+//        statisticheGiocoService.deleteStatisticaGioco(userId, statisticaId);
+//        return ResponseEntity.ok("Statistica eliminata con successo");
+//    }
+//    @DeleteMapping("/{statisticaId}")
+//    public ResponseEntity<String> eliminaStatisticaGioco(@PathVariable Long statisticaId) {
+//        statisticheGiocoService.deleteStatisticaGioco(statisticaId);
+//        return ResponseEntity.ok("Statistica eliminata con successo");
+//    }
 
     @GetMapping("/utente/{userId}/tutte")
     @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
@@ -92,7 +98,7 @@ public class StatisticaGiocoController {
     }
 
     @GetMapping("/gioco/{nomeGioco}")
-    @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
+//    @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
     public ResponseEntity<List<StatisticaGioco>> getUtentiConStatistichePerGioco(@PathVariable String nomeGioco) {
         List<StatisticaGioco> utentiConStatistiche = statisticheGiocoService.getUtentiConStatistichePerGioco(nomeGioco);
         return ResponseEntity.ok(utentiConStatistiche);

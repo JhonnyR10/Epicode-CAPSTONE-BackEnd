@@ -32,7 +32,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JsonIgnoreProperties("utente")
     private List<StatisticaGioco> statisticheGiochi;
 
@@ -59,5 +59,10 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public void removeStatisticaGioco(Long statisticaId) {
+        // Rimuovi la statistica dal set di statistiche dell'utente
+        statisticheGiochi.removeIf(statistica -> statistica.getIdStatisticaGioco().equals(statisticaId));
     }
 }

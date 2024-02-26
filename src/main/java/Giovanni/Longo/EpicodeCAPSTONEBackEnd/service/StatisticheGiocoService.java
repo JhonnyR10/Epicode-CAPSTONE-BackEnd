@@ -29,6 +29,7 @@ public class StatisticheGiocoService {
     @Autowired
     private UserService userService;
 
+
     private static StatisticaLeague getStatisticaLeague(StatisticaLeagueDTO body) {
         StatisticaLeague nuovaLega = new StatisticaLeague();
         nuovaLega.setQueueType(body.queueType());
@@ -171,19 +172,54 @@ public class StatisticheGiocoService {
         }
     }
 
-    public void deleteStatisticaGioco(Long userId, Long statisticaId) {
-        User userFound = userService.findById(userId);
-        if (userFound != null) {
-            StatisticaGioco statisticaFound = this.findById(statisticaId);
-            if (statisticaFound != null) {
-                statisticaGiocoRepository.delete(statisticaFound);
-            } else {
-                System.out.println("Statistica non trovata per il gioco: " + statisticaId);
-            }
-        } else {
-            System.out.println("Utente non trovato con ID: " + userId);
-        }
-    }
+
+    //    public void deleteStatisticaGioco(Long userId, Long statisticaId) {
+//        User userFound = userService.findById(userId);
+//
+//        if (userFound != null) {
+//            System.out.println("Utente trovato con ID: " + userId);
+//            StatisticaGioco statisticaFound = this.findById(statisticaId);
+//            if (statisticaFound != null) {
+//                System.out.println("Statistica trovata per il gioco: " + statisticaId);
+//                statisticaGiocoRepository.delete(statisticaFound);
+//                System.out.println("Eliminazione riuscita");
+//            } else {
+//                System.out.println("Statistica non trovata per il gioco: " + statisticaId);
+//            }
+//        } else {
+//            System.out.println("Utente non trovato con ID: " + userId);
+//        }
+//    }
+//    public void deleteStatisticaGioco(Long statisticaId) {
+//        StatisticaFortinite statisticaFound = (StatisticaFortinite) this.findById(statisticaId);
+//        if (statisticaFound != null) {
+//            System.out.println("Statistica trovata per il gioco: " + statisticaId);
+//            statisticaGiocoRepository.delete(statisticaFound);
+//            System.out.println("Eliminazione riuscita");
+//        } else {
+//            System.out.println("Statistica non trovata per il gioco: " + statisticaId);
+//        }
+//    }
+
+
+    //    public void deleteStatisticaGioco(Long userId, Long statisticaId) {
+//        User userFound = userService.findById(userId);
+//
+//        if (userFound != null) {
+//            StatisticaGioco statisticaFound = statisticaGiocoRepository.findById(statisticaId)
+//                    .orElseThrow(() -> new NotFoundException(statisticaId));
+//
+//            if (statisticaFound != null) {
+//                userFound.removeStatisticaGioco(statisticaFound);
+//                userService.save(userFound);
+//            } else {
+//                System.out.println("Statistica non trovata per il gioco: " + statisticaId);
+//            }
+//        } else {
+//            System.out.println("Utente non trovato con ID: " + userId);
+//        }
+//    }
+
 
     public List<StatisticaGioco> getTutteStatisticheUtente(Long userId) {
         User foundUser = userService.findById(userId);

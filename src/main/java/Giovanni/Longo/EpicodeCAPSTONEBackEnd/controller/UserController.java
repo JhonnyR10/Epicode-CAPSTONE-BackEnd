@@ -1,6 +1,7 @@
 package Giovanni.Longo.EpicodeCAPSTONEBackEnd.controller;
 
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.BadRequestException;
+import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.NotFoundException;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.model.User;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.payloads.UserRegisterDTO;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.payloads.UserRegisterResponseDTO;
@@ -75,6 +76,22 @@ public class UserController {
             return userService.uploadAvatar(userId, file);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping("/{userId}/{statisticaId}")
+    public ResponseEntity<String> deleteStatisticaGioco(
+            @PathVariable Long userId,
+            @PathVariable Long statisticaId) {
+        try {
+            userService.deleteStatisticaGioco(userId, statisticaId);
+            return ResponseEntity.ok("Statistica del gioco eliminata con successo.");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Statistica del gioco non trovata.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Errore durante l'eliminazione della statistica del gioco.");
         }
     }
 }
