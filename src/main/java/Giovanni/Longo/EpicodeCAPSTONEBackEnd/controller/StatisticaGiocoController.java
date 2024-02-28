@@ -1,5 +1,6 @@
 package Giovanni.Longo.EpicodeCAPSTONEBackEnd.controller;
 
+import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.NoRankedLeagueException;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.model.StatisticaGioco;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.payloads.StatisticaLeagueDTO;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.service.StatisticheGiocoService;
@@ -44,20 +45,6 @@ public class StatisticaGiocoController {
         }
     }
 
-
-    @PostMapping("/lol/{userId}")
-    @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
-    public ResponseEntity<?> salvaStatisticaLol(@PathVariable Long userId, @RequestBody StatisticaLeagueDTO body) {
-        try {
-            statisticheGiocoService.salvaStatisticaLol(userId, body);
-
-            return ResponseEntity.ok("Statistica salvata con successo");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Si è verificato un errore durante il salvataggio delle statistiche di gioco.");
-        }
-    }
-
     @PutMapping("/lol/{userId}")
     @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
     public ResponseEntity<?> aggiornaStatisticaLol(@PathVariable Long userId, @RequestParam Long statisticaId, @RequestBody StatisticaLeagueDTO body) {
@@ -70,18 +57,6 @@ public class StatisticaGiocoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Si è verificato un errore durante il salvataggio delle statistiche di gioco.");
         }
     }
-
-    //    @DeleteMapping("/{userId}/{statisticaId}")
-//    @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
-//    public ResponseEntity<String> eliminaStatisticaGioco(@PathVariable Long userId, @PathVariable Long statisticaId) {
-//        statisticheGiocoService.deleteStatisticaGioco(userId, statisticaId);
-//        return ResponseEntity.ok("Statistica eliminata con successo");
-//    }
-//    @DeleteMapping("/{statisticaId}")
-//    public ResponseEntity<String> eliminaStatisticaGioco(@PathVariable Long statisticaId) {
-//        statisticheGiocoService.deleteStatisticaGioco(statisticaId);
-//        return ResponseEntity.ok("Statistica eliminata con successo");
-//    }
 
     @GetMapping("/utente/{userId}/tutte")
     @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
@@ -102,5 +77,17 @@ public class StatisticaGiocoController {
     public ResponseEntity<List<StatisticaGioco>> getUtentiConStatistichePerGioco(@PathVariable String nomeGioco) {
         List<StatisticaGioco> utentiConStatistiche = statisticheGiocoService.getUtentiConStatistichePerGioco(nomeGioco);
         return ResponseEntity.ok(utentiConStatistiche);
+    }
+
+    @PostMapping("/salva-lol")
+    public ResponseEntity<String> salvaStatisticaLol(@RequestParam Long userId, @RequestParam String usernameGioco) {
+        try {
+            statisticheGiocoService.salvaStatisticaLol(userId, usernameGioco);
+            return ResponseEntity.ok("Statistica LOL salvata con successo.");
+        } catch (NoRankedLeagueException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("L'account non è in nessuna lega ranked.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore durante il salvataggio della statistica LOL.");
+        }
     }
 }

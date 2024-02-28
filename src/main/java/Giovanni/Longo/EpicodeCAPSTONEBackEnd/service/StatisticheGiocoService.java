@@ -1,6 +1,7 @@
 package Giovanni.Longo.EpicodeCAPSTONEBackEnd.service;
 
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.BadRequestException;
+import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.NoRankedLeagueException;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.NotFoundException;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.model.*;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.payloads.StatisticaLeagueDTO;
@@ -28,6 +29,8 @@ public class StatisticheGiocoService {
     private StatisticaGiocoRepository statisticaGiocoRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private RiotGamesApiService riotGamesApiService;
 
 
     private static StatisticaLeague getStatisticaLeague(StatisticaLeagueDTO body) {
@@ -53,25 +56,66 @@ public class StatisticheGiocoService {
                 .orElseThrow(() -> new NotFoundException(id));
     }
 
-    public void salvaStatisticaLol(Long id, StatisticaLeagueDTO body) {
-        User found = userService.findById(id);
-        if (found != null) {
+    //    public void salvaStatisticaLol(Long id, StatisticaLeagueDTO body) {
+//        User found = userService.findById(id);
+//        if (found != null) {
+//            try {
+//                StatisticaLol nuovaStatisticaLol = new StatisticaLol();
+//                nuovaStatisticaLol.setUtente(found);
+//                nuovaStatisticaLol.setNomeGioco("League of Legends");
+//                nuovaStatisticaLol.setUsernameGioco(body.summonerName());
+//                StatisticaLeague nuovaLega = getStatisticaLeague(body);
+//                nuovaStatisticaLol.setLeague(nuovaLega);
+//                nuovaStatisticaLol.setUltimoAggiornamento(LocalDateTime.now());
+//                StatisticaGioco savedStatisticaGioco = statisticaGiocoRepository.save(nuovaStatisticaLol);
+//                found.getStatisticheGiochi().add(savedStatisticaGioco);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            new NotFoundException(id);
+//            System.out.println("Utente non trovato con ID: " + id);
+//        }
+//    }
+    public String salvaStatisticaLol(Long userId, String usernameGioco) {
+        // Recupera l'utente dal repository
+        User user = userService.findById(userId);
+
+        if (user != null) {
             try {
-                StatisticaLol nuovaStatisticaLol = new StatisticaLol();
-                nuovaStatisticaLol.setUtente(found);
-                nuovaStatisticaLol.setNomeGioco("League of Legends");
-                nuovaStatisticaLol.setUsernameGioco(body.summonerName());
-                StatisticaLeague nuovaLega = getStatisticaLeague(body);
-                nuovaStatisticaLol.setLeague(nuovaLega);
-                nuovaStatisticaLol.setUltimoAggiornamento(LocalDateTime.now());
-                StatisticaGioco savedStatisticaGioco = statisticaGiocoRepository.save(nuovaStatisticaLol);
-                found.getStatisticheGiochi().add(savedStatisticaGioco);
-            } catch (Exception e) {
+                // Eseguire la chiamata all'API di Riot Games per ottenere l'ID del giocatore
+                String summonerId = riotGamesApiService.getSummonerIdByUsername(usernameGioco);
+
+                // Eseguire la chiamata all'API di Riot Games per ottenere le statistiche
+                List<StatisticaLeague> statisticheGiocoDTOs = riotGamesApiService.getStatisticheGiocoById(summonerId);
+
+                // Iterare attraverso le statistiche e salvarle nel repository
+                for (StatisticaLeague statisticaGiocoDTO : statisticheGiocoDTOs) {
+                    StatisticaLol nuovaStatisticaLol = new StatisticaLol();
+                    nuovaStatisticaLol.setUtente(user);
+                    nuovaStatisticaLol.setNomeGioco("League of Legends");
+                    nuovaStatisticaLol.setUsernameGioco(usernameGioco);
+                    nuovaStatisticaLol.setLeague(statisticaGiocoDTO);
+                    nuovaStatisticaLol.setUltimoAggiornamento(LocalDateTime.now());
+
+                    // Salvare la nuova statistica nel repository
+                    StatisticaGioco savedStatisticaGioco = statisticaGiocoRepository.save(nuovaStatisticaLol);
+
+                    // Aggiungere la nuova statistica all'utente
+                    user.getStatisticheGiochi().add(savedStatisticaGioco);
+                }
+
+                return "Statistica LOL salvata con successo.";
+            } catch (NoRankedLeagueException e) {
                 e.printStackTrace();
+                throw new NoRankedLeagueException("ashbdfjonbsdlkfnsadlngfla");
+            } catch (Exception e) {
+
+                e.printStackTrace();
+                throw new RuntimeException("Errore durante il salvataggio della statistica LOL.", e);
             }
         } else {
-            new NotFoundException(id);
-            System.out.println("Utente non trovato con ID: " + id);
+            throw new NotFoundException(userId);
         }
     }
 
