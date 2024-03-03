@@ -56,27 +56,6 @@ public class StatisticheGiocoService {
                 .orElseThrow(() -> new NotFoundException(id));
     }
 
-    //    public void salvaStatisticaLol(Long id, StatisticaLeagueDTO body) {
-//        User found = userService.findById(id);
-//        if (found != null) {
-//            try {
-//                StatisticaLol nuovaStatisticaLol = new StatisticaLol();
-//                nuovaStatisticaLol.setUtente(found);
-//                nuovaStatisticaLol.setNomeGioco("League of Legends");
-//                nuovaStatisticaLol.setUsernameGioco(body.summonerName());
-//                StatisticaLeague nuovaLega = getStatisticaLeague(body);
-//                nuovaStatisticaLol.setLeague(nuovaLega);
-//                nuovaStatisticaLol.setUltimoAggiornamento(LocalDateTime.now());
-//                StatisticaGioco savedStatisticaGioco = statisticaGiocoRepository.save(nuovaStatisticaLol);
-//                found.getStatisticheGiochi().add(savedStatisticaGioco);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        } else {
-//            new NotFoundException(id);
-//            System.out.println("Utente non trovato con ID: " + id);
-//        }
-//    }
     public String salvaStatisticaLol(Long userId, String usernameGioco) {
         // Recupera l'utente dal repository
         User user = userService.findById(userId);
@@ -108,7 +87,7 @@ public class StatisticheGiocoService {
                 return "Statistica LOL salvata con successo.";
             } catch (NoRankedLeagueException e) {
                 e.printStackTrace();
-                throw new NoRankedLeagueException("ashbdfjonbsdlkfnsadlngfla");
+                throw new NoRankedLeagueException("L'account non è in nessuna lega ranked.");
             } catch (Exception e) {
 
                 e.printStackTrace();
@@ -119,37 +98,53 @@ public class StatisticheGiocoService {
         }
     }
 
-    public void aggiornaStatisticaLol(Long id, Long statId, StatisticaLeagueDTO body) {
+    public String aggiornaStatisticaLol(Long id, Long statId, String usernameGioco) {
         User found = userService.findById(id);
         if (found != null) {
-            StatisticaLol statisticaFound = (StatisticaLol) this.findById(statId);
             try {
-                statisticaFound.setNomeGioco("League of Legends");
-                statisticaFound.setUsernameGioco(body.summonerName());
-                StatisticaLeague nuovaLega = statisticaFound.getLeague();
-                nuovaLega.setQueueType(body.queueType());
-                nuovaLega.setSummonerName(body.summonerName());
-                nuovaLega.setHotStreak(body.hotStreak());
-                nuovaLega.setWins(body.wins());
-                nuovaLega.setVeteran(body.veteran());
-                nuovaLega.setLosses(body.losses());
-                nuovaLega.setRank(body.rank());
-                nuovaLega.setTier(body.tier());
-                nuovaLega.setInactive(body.inactive());
-                nuovaLega.setFreshBlood(body.freshBlood());
-                nuovaLega.setLeagueId(body.leagueId());
-                nuovaLega.setSummonerId(body.summonerId());
-                nuovaLega.setLeaguePoints(body.leaguePoints());
-                statisticaFound.setUltimoAggiornamento(LocalDateTime.now());
-                statisticaGiocoRepository.save(statisticaFound);
+                // Eseguire la chiamata all'API di Riot Games per ottenere l'ID del giocatore
+                String summonerId = riotGamesApiService.getSummonerIdByUsername(usernameGioco);
+
+                // Eseguire la chiamata all'API di Riot Games per ottenere le statistiche
+                List<StatisticaLeague> statisticheGiocoDTOs = riotGamesApiService.getStatisticheGiocoById(summonerId);
+
+                StatisticaLol statisticaFound = (StatisticaLol) this.findById(statId);
+                if (statisticaFound != null) {
+                    // Caricare la relazione corrente
+                    StatisticaLeague existingLeague = statisticaFound.getLeague();
+
+                    // Aggiornare i campi desiderati
+                    existingLeague.setQueueType(statisticheGiocoDTOs.get(0).getQueueType());
+                    existingLeague.setSummonerName(statisticheGiocoDTOs.get(0).getSummonerName());
+                    existingLeague.setHotStreak(statisticheGiocoDTOs.get(0).isHotStreak());
+                    existingLeague.setWins(statisticheGiocoDTOs.get(0).getWins());
+                    existingLeague.setVeteran(statisticheGiocoDTOs.get(0).isVeteran());
+                    existingLeague.setLosses(statisticheGiocoDTOs.get(0).getLosses());
+                    existingLeague.setRank(statisticheGiocoDTOs.get(0).getRank());
+                    existingLeague.setTier(statisticheGiocoDTOs.get(0).getTier());
+                    existingLeague.setInactive(statisticheGiocoDTOs.get(0).isInactive());
+                    existingLeague.setFreshBlood(statisticheGiocoDTOs.get(0).isFreshBlood());
+                    existingLeague.setLeagueId(statisticheGiocoDTOs.get(0).getLeagueId());
+                    existingLeague.setSummonerId(statisticheGiocoDTOs.get(0).getSummonerId());
+                    existingLeague.setLeaguePoints(statisticheGiocoDTOs.get(0).getLeaguePoints());
+                    statisticaFound.setUltimoAggiornamento(LocalDateTime.now());
+                    statisticaGiocoRepository.save(statisticaFound);
+                    return "Statistica LOL salvata con successo.";
+                } else {
+                    throw new NotFoundException("Statistica non trovata con ID: " + statId);
+                }
+            } catch (NoRankedLeagueException e) {
+                e.printStackTrace();
+                throw new NoRankedLeagueException("L'account non è in nessuna lega ranked.");
             } catch (Exception e) {
                 e.printStackTrace();
+                throw new RuntimeException("Errore durante l'aggiornamento della statistica LOL.", e);
             }
         } else {
-            new NotFoundException(id);
-            System.out.println("Utente non trovato con ID: " + id);
+            throw new NotFoundException(id);
         }
     }
+
 
     public void salvaStatisticaGiocoDaJson(Long id, String jsonApiResponse) {
         User found = userService.findById(id);

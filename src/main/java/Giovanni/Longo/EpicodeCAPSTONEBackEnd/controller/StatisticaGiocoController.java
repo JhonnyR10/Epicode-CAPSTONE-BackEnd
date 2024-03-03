@@ -2,7 +2,6 @@ package Giovanni.Longo.EpicodeCAPSTONEBackEnd.controller;
 
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.NoRankedLeagueException;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.model.StatisticaGioco;
-import Giovanni.Longo.EpicodeCAPSTONEBackEnd.payloads.StatisticaLeagueDTO;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.service.StatisticheGiocoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,16 +44,28 @@ public class StatisticaGiocoController {
         }
     }
 
+    @PostMapping("/salva-lol")
+    public ResponseEntity<String> salvaStatisticaLol(@RequestParam Long userId, @RequestParam String usernameGioco) {
+        try {
+            statisticheGiocoService.salvaStatisticaLol(userId, usernameGioco);
+            return ResponseEntity.ok("Statistica LOL salvata con successo.");
+        } catch (NoRankedLeagueException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("L'account non è in nessuna lega ranked.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore durante il salvataggio della statistica LOL.");
+        }
+    }
+
     @PutMapping("/lol/{userId}")
     @PreAuthorize("hasAuthority('ADMIN') or (#userId == principal.id)")
-    public ResponseEntity<?> aggiornaStatisticaLol(@PathVariable Long userId, @RequestParam Long statisticaId, @RequestBody StatisticaLeagueDTO body) {
+    public ResponseEntity<String> aggiornaStatisticaLol(@PathVariable Long userId, @RequestParam Long statisticaId, @RequestParam String usernameGioco) {
         try {
-            statisticheGiocoService.aggiornaStatisticaLol(userId, statisticaId, body);
-
-            return ResponseEntity.ok("Statistica aggiornata con successo");
+            statisticheGiocoService.aggiornaStatisticaLol(userId, statisticaId, usernameGioco);
+            return ResponseEntity.ok("Statistica LOL salvata con successo.");
+        } catch (NoRankedLeagueException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("L'account non è in nessuna lega ranked.");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Si è verificato un errore durante il salvataggio delle statistiche di gioco.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore durante il salvataggio della statistica LOL.");
         }
     }
 
@@ -79,15 +90,5 @@ public class StatisticaGiocoController {
         return ResponseEntity.ok(utentiConStatistiche);
     }
 
-    @PostMapping("/salva-lol")
-    public ResponseEntity<String> salvaStatisticaLol(@RequestParam Long userId, @RequestParam String usernameGioco) {
-        try {
-            statisticheGiocoService.salvaStatisticaLol(userId, usernameGioco);
-            return ResponseEntity.ok("Statistica LOL salvata con successo.");
-        } catch (NoRankedLeagueException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("L'account non è in nessuna lega ranked.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore durante il salvataggio della statistica LOL.");
-        }
-    }
+
 }
