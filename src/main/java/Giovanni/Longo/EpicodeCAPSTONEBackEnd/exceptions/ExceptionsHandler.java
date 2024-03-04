@@ -17,6 +17,12 @@ public class ExceptionsHandler {
         return new ErrorsDTO(ex.getMessage(), LocalDateTime.now());
     }
 
+    @ExceptionHandler(MatchAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // Dovrà rispondere con un 400
+    public ErrorsDTO handleBadRequest(MatchAlreadyExistsException ex) {
+        return new ErrorsDTO(ex.getMessage(), LocalDateTime.now());
+    }
+
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND) // Dovrà rispondere con un 404
     public ErrorsDTO handleNotFound(NotFoundException ex) {

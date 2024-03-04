@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -94,4 +95,31 @@ public class UserController {
                     .body("Errore durante l'eliminazione della statistica del gioco.");
         }
     }
+
+    @PostMapping("/{userId}/matches/{matchId}")
+    public ResponseEntity<User> addMatch(@PathVariable Long userId, @PathVariable Long matchId) {
+        try {
+            User updatedUser = userService.addMatch(userId, matchId);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            // Log dell'eccezione
+            e.printStackTrace();
+            // Gestione dell'errore e ritorno di una risposta appropriata
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @GetMapping("/{userId}/matches")
+    public ResponseEntity<List<User>> getAllMatches(@PathVariable Long userId) {
+        List<User> matches = userService.getAllMatches(userId);
+        return ResponseEntity.ok(matches);
+    }
+
+    @DeleteMapping("/{userId}/matches/{matchId}")
+    public ResponseEntity<User> removeMatch(@PathVariable Long userId, @PathVariable Long matchId) {
+        User updatedUser = userService.removeMatch(userId, matchId);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+
 }

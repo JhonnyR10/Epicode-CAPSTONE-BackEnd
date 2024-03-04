@@ -11,7 +11,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -35,6 +37,16 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JsonIgnoreProperties("utente")
     private List<StatisticaGioco> statisticheGiochi;
+
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_matches",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "match_id")
+    )
+    @JsonIgnoreProperties("matches")
+    private Set<User> matches = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -65,4 +77,19 @@ public class User implements UserDetails {
         // Rimuovi la statistica dal set di statistiche dell'utente
         statisticheGiochi.removeIf(statistica -> statistica.getIdStatisticaGioco().equals(statisticaId));
     }
+
+    public Set<User> getMatches() {
+        return matches;
+    }
+
+    public void addMatch(User match) {
+        matches.add(match);
+        match.getMatches().add(this);
+    }
+
+    public void removeMatch(User match) {
+        matches.remove(match);
+        match.getMatches().remove(this);
+    }
+
 }

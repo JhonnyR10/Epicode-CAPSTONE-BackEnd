@@ -1,6 +1,7 @@
 package Giovanni.Longo.EpicodeCAPSTONEBackEnd.service;
 
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.BadRequestException;
+import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.MatchAlreadyExistsException;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.exceptions.NotFoundException;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.model.User;
 import Giovanni.Longo.EpicodeCAPSTONEBackEnd.payloads.UserRegisterDTO;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -26,6 +29,7 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private Cloudinary cloudinaryUploader;
+
     private PasswordEncoder bcrypt = new BCryptPasswordEncoder(11);
 
     public Page<User> getUsers(int page, int size, String orderBy) {
@@ -91,6 +95,34 @@ public class UserService {
         } else {
             System.out.println("Utente non trovato con ID: " + userId);
         }
+    }
+
+    public User addMatch(Long userId, Long matchId) {
+        User user = findById(userId);
+        User match = findById(matchId);
+
+        // Verifica se l'amico è già presente nella lista
+        if (!user.getMatches().contains(match)) {
+            user.addMatch(match);
+            return userRepository.save(user);
+        } else {
+            // L'amico è già presente, lanci l'eccezione personalizzata
+            throw new MatchAlreadyExistsException("Match with ID " + matchId + " already exists in the user's matches.");
+        }
+    }
+
+    public List<User> getAllMatches(Long userId) {
+        User user = findById(userId);
+        return new ArrayList<>(user.getMatches());
+    }
+
+    public User removeMatch(Long userId, Long matchId) {
+        User user = findById(userId);
+        User match = findById(matchId);
+
+        user.removeMatch(match);
+
+        return userRepository.save(user);
     }
 
 }
