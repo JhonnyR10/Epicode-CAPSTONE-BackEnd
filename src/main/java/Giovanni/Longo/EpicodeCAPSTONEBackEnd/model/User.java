@@ -52,6 +52,11 @@ public class User implements UserDetails {
     @JsonIgnoreProperties("author")
     private List<News> news;
 
+    @Column(name = "is_vip")
+    private boolean isVip = false; // Default è false
+    @Column(name = "stripe_customer_id")
+    private String stripeCustomerId;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role.name()));

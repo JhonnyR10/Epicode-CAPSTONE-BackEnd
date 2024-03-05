@@ -135,4 +135,10 @@ public class UserService {
             System.out.println("Utente non trovato con ID: " + userId);
         }
     }
+
+    public void activateVipStatus(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Utente non trovato"));
+        user.setVip(true);
+        userRepository.save(user);
+    }
 }
