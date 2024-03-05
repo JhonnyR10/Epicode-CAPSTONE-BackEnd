@@ -1,4 +1,4 @@
-# Piattaforma di Gaming Integrata - Backend
+# Piattaforma di Gaming Integrata - MATCH PLAY - Backend
 
 ## Panoramica
 Il backend della Piattaforma di Gaming Integrata gestisce la logica dell'applicazione, l'autenticazione degli utenti, 
