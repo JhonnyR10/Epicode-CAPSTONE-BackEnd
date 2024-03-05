@@ -125,4 +125,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public void findNewsByIdAndDelete(long userId, long newsId) {
+        User user = findById(userId);
+        if (user != null) {
+            user.removeNews(newsId);
+            userRepository.save(user);
+        } else {
+            System.out.println("Utente non trovato con ID: " + userId);
+        }
+    }
 }

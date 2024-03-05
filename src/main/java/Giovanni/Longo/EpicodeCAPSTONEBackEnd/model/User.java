@@ -48,6 +48,10 @@ public class User implements UserDetails {
     @JsonIgnoreProperties("matches")
     private Set<User> matches = new HashSet<>();
 
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JsonIgnoreProperties("author")
+    private List<News> news;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role.name()));
@@ -76,6 +80,11 @@ public class User implements UserDetails {
     public void removeStatisticaGioco(Long statisticaId) {
         // Rimuovi la statistica dal set di statistiche dell'utente
         statisticheGiochi.removeIf(statistica -> statistica.getIdStatisticaGioco().equals(statisticaId));
+    }
+
+    public void removeNews(Long newsId) {
+        // Rimuovi la statistica dal set di statistiche dell'utente
+        news.removeIf(news -> news.getId().equals(newsId));
     }
 
     public Set<User> getMatches() {

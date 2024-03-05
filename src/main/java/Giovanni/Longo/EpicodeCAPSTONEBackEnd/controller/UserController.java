@@ -121,5 +121,10 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    @DeleteMapping("/{userId}/news/{newsId}")
+    public ResponseEntity<?> deleteNews(@PathVariable Long userId, @PathVariable Long newsId) {
+        userService.findNewsByIdAndDelete(userId, newsId);
+        return ResponseEntity.ok("NEWS eliminata con successo.");
+    }
 
 }
